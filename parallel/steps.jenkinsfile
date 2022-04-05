@@ -11,33 +11,30 @@ pipeline {
                 sh 'echo "hello=world" > env'
             }
         }
-        stage('CA1') {
+        stage('Candidates') {
             steps {
-                script {
-                    commandSteps = [:]
-                    for (int i = 0; i < params.parallelSteps.toInteger(); i++) {
-                        commandSteps["Step ${i}"] = {
-                            sh 'cat env'
-                            sleep time: 2
-                        }
-                    }
-                    parallel commandSteps
-                }
+                createStage('CA1')
+                createStage('CA2')
             }
-        }
-        stage('CA2') {
-            steps {
-                script {
-                    commandSteps = [:]
-                    for (int i = 0; i < params.parallelSteps.toInteger(); i++) {
-                        commandSteps["Step ${i}"] = {
-                            sh 'cat env'
-                            sleep time: 2
-                        }
-                    }
-                    parallel commandSteps
-                }
-            }
+            
         }
     }
 }
+
+def createStage(name = 'CA') {
+    stage(name) {
+        catEnv()
+    }
+}
+
+def catEnv() {
+    commandSteps = [:]
+    for (int i = 0; i < params.parallelSteps.toInteger(); i++) {
+        commandSteps["Step ${i}"] = {
+            sh 'cat env'
+            sleep time: 2
+        }
+    }
+    parallel commandSteps
+}
+
