@@ -1,0 +1,39 @@
+/**
+ * See also: https://gist.github.com/richid/d498346030275ae1790618039d8965c0 
+**/
+pipeline {
+    agent any
+    
+    parameters {
+        string(name: 'parallelCount', defaultValue: '3')
+    }
+
+    stages {
+        stage('Init') {
+            steps {
+                sh 'echo "hello=world" > env'
+            }
+        }
+        stage('Candidates') {
+            steps {
+                script {
+                    catEnv()
+                }
+            }
+        }
+    }
+}
+
+def catEnv() {
+    stages = [:]
+    for (int i = 0; i < params.parallelCount.toInteger(); i++) {
+        def index = i
+        stages["Job ${i}"] = {
+            stage("CA ${index}") {
+                sh 'cat env'
+                sleep time: 2
+            }
+        }
+    }
+    parallel stages
+}
